@@ -1,6 +1,7 @@
-const fs = require('fs')
+// const fs = require('fs')
 const Schema = require('validate')
-const { logger, schemaBuilder, utils, printErrors } = require('../lib')
+// const { logger, schemaBuilder, utils, printErrors } = require('../lib')
+const { logger, schemaBuilder, printErrors } = require('../lib')
 
 const logLevels = {
   none: 0,
@@ -13,8 +14,10 @@ const validateSchema =  (targetObject, options = {}) => {
   if(!targetObject)
     return logger.error('Missing argument: either targetObject or filePath is required')
   let isPath = typeof targetObject === 'string'
-  if(isPath ? !fs.existsSync(targetObject) : typeof targetObject !== 'object')
-    return logger.error('Target must be either be an object or a valid filepath')
+  if(isPath)
+    return logger.error('This version does not support filePathes, only objects')
+//   if(isPath ? !fs.existsSync(targetObject) : typeof targetObject !== 'object')
+//     return logger.error('Target must be either be an object or a valid filepath')
 
   if(logLevels[options.logLevel] > 2) {
     logger.info(`Validating schema for: ${JSON.stringify(targetObject)}`)
@@ -25,7 +28,8 @@ const validateSchema =  (targetObject, options = {}) => {
     }
     let inputSchema = options.schema || options.schemaPath || `${__dirname}/../examples/schema.json`
     const schema = schemaBuilder.getSchema(inputSchema)
-    const content = isPath ? utils.loadContent(targetObject) : targetObject
+    // const content = isPath ? utils.loadContent(targetObject) : targetObject
+    const content = targetObject
     const clone = JSON.parse(JSON.stringify(content))
     const misMatches = new Schema(schema).validate(content).map(err => ({path: err.path, message: err.message}))
     const extraFiels = validateExtraFields(clone, schema)
@@ -70,7 +74,7 @@ const _getSchemaFromObj = (object) => {
       if(Array.isArray(object[key])) {
         let first = object[key][0]
         keyValues[key] = [
-          typeof first === 'object' ? _getSchemaFromObj(first) : {type: typeof first}  
+          typeof first === 'object' ? _getSchemaFromObj(first) : {type: typeof first}
         ]
       } else {
         keyValues[key] = _getSchemaFromObj(object[key])

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YAML Parser</title>
+</head>
+
+<body>
+    <label for="schema">Schema</label>
+    <textarea name="schema" id="schema"></textarea>
+
+    <label for="object">Objeto</label>
+    <textarea name="object" id="object"></textarea>
+
+    <button id="validate">Validar</button>
+
+    <pre id="feedback"></pre>
+
+    <script type="module">
+        const example = JSON.stringify({ name: { first: 'Tom', last: 'Xoman' }, age: 45 });
+        document.getElementById('object').value = example;
+
+        const schema = JSON.stringify({
+            name: {
+                first: { type: String, required: true },
+                last: { type: String, required: true }
+            },
+            age: { type: Number }
+        });
+        document.getElementById('schema').value = schema;
+    </script>
+
+    <script type="module">
+        import validateSchema from './bundle.js';
+
+        const validateButton = document.getElementById('validate');
+        validateButton.onclick = () => {
+
+            const obj = JSON.parse(document.getElementById('object').value);
+            const schema = JSON.parse(document.getElementById('schema').value);
+
+            const schemaErrors = validateSchema(obj, { schema: schema });
+            document.getElementById('feedback').innerText = JSON.stringify(schemaErrors);
+        };
+    </script>
+</body>
+
+</html>
